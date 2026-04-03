@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>One-Time Code</h2>
+
+<p>Click below to reveal your one-time code.</p>
+
+<button id="revealBtn" class="btn" onclick="revealCode()">Reveal Code</button>
+
+<p id="otp" style="display:none; font-weight:bold; font-size:32px; margin-top:20px;">
+    {{ session['otp_code'] }}
+</p>
+
+<p id="timer" style="display:none; font-size:18px; margin-top:10px; color:#555;">
+    Expires in: <span id="countdown">{{ remaining }}</span> seconds
+</p>
+
+<!-- 🔐 OTP Verification Form -->
+<form method="POST" action="{{ url_for('auth.otp') }}" style="margin-top:20px; display:none;" id="otpForm">
+    
+    <input type="text"
+           name="otp"
+           maxlength="6"
+           pattern="\d{6}"
+           placeholder="Enter 6-digit code"
+           required
+           style="padding:8px; font-size:16px; text-align:center;">
+
+    <br><br>
+
+    <button type="submit" style="padding:8px 16px;">
+        Verify Code
+    </button>
+
+</form>
+
+{% if error %}
+<p style="color:red; margin-top:10px;">{{ error }}</p>
+{% endif %}
+
+<script>
+let countdownInterval;
+let timeRemaining = {{ remaining }};
+
+function revealCode() {
+    document.getElementById("otp").style.display = "block";
+    document.getElementById("timer").style.display = "block";
+    document.getElementById("otpForm").style.display = "block";
+    document.getElementById("revealBtn").disabled = true;
+
+    startCountdown();
+}
+
+function startCountdown() {
+    countdownInterval = setInterval(function() {
+
+        timeRemaining--;
+        document.getElementById("countdown").textContent = timeRemaining;
+
+        if (timeRemaining <= 0) {
+            clearInterval(countdownInterval);
+
+            document.getElementById("otp").textContent = "Code Expired";
+            document.getElementById("otpForm").style.display = "none";
+
+            setTimeout(function(){
+                location.reload();
+            }, 3000);
+        }
+
+    }, 1000);
+}
+</script>
+
+{% endblock %}

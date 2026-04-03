@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Login Error{% endblock %}
+
+{% block content %}
+<h1>Username Not Found</h1>
+
+<p>
+    The username <strong>{{ username }}</strong> does not exist.
+    Please check and try again.
+</p>
+
+<div class="actions">
+    <a href="{{ url_for('auth.login_username') }}" class="btn">
+        Retry login
+    </a>
+
+    <a href="{{ url_for('auth.start') }}" class="btn secondary">
+        Return to homepage
+    </a>
+</div>
+{% endblock %}

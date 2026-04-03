@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Consent Form</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+<main class="container">
+
+<h1>Consent Form</h1>
+
+<p>
+I confirm that I have read and understand the Participant Information Leaflet  for the study. I have had the opportunity to consider the information, ask questions and have had these answered satisfactorily.
+</p>
+<p>
+I understand that my participation is voluntary and that I am free to withdraw at any time without giving any reason, without my medical, social care, education, or legal rightsbeing affected.
+</p>
+<p>
+I understand that data collected during the study, may be looked at by individuals from The University of Warwick, from regulatory authorities, where it is relevant to my taking part in this study. I give permission for these individuals to have access to my data.
+</p>
+<p>
+I am happy for my data to be used in future research.
+</p>
+<p>
+I agree to take part in the above study.
+</p>
+
+<form method="POST" action="{{ url_for('auth.submit_consent') }}">
+
+<label class="checkbox">
+<input type="checkbox" name="agree" required>
+I confirm that I have read and understood the Participant Information
+Leaflet and agree with the above statements to participate in this study.
+</label>
+
+<div class="actions">
+
+<button type="submit" class="btn">
+Confirm and Continue
+</button>
+
+<a href="{{ url_for('auth.information') }}" class="btn secondary">
+Back to Information
+</a>
+
+</div>
+
+</form>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Verification Failed{% endblock %}
+
+{% block content %}
+<h1>Verification Failed</h1>
+
+<p>Your recall selection was incorrect. Please try again.</p>
+
+<div style="margin-top: 30px;">
+    <a href="{{ url_for('auth.recall') }}" class="btn">
+        Try Again
+    </a>
+
+    <a href="/" class="btn secondary">
+        Back to Home
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Training{% endblock %}
+
+{% block content %}
+
+<h1>Welcome</h1>
+
+<p>
+    Before you begin, please watch this short video explaining the task.
+</p>
+
+<div style="text-align: center; margin: 20px 0;">
+    <video id="trainingVideo" width="300" controls>
+        <source src="{{ url_for('static', filename='videos/training.mp4') }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
+<button class="btn" id="continueBtn" disabled>
+    Continue
+</button>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    const video = document.getElementById("trainingVideo");
+    const btn = document.getElementById("continueBtn");
+
+    // Enable button only after video finishes
+    video.onended = function() {
+        btn.disabled = false;
+    };
+
+    // Redirect to start page
+    btn.onclick = function() {
+        window.location.href = "{{ url_for('auth.start') }}";
+    };
+
+</script>
+{% endblock %}

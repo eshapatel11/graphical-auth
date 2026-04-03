@@ -1,0 +1,5 @@
+Flask
+bcrypt
+PyOTP
+python-dotenv
+gunicorn

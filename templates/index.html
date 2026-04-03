@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h1>Welcome</h1>
+<p>Select an option below:</p>
+
+<div class="actions">
+    <a class="btn" href="{{ url_for('auth.register_username') }}">Register</a>
+    <a class="btn secondary" href="{{ url_for('auth.login_username') }}">Login</a>
+</div>
+
+{% endblock %}

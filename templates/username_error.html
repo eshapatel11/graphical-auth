@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Username Error{% endblock %}
+
+{% block content %}
+<h1>Username Already Exists</h1>
+
+<p>
+    The username <strong>{{ username }}</strong> is already in use.
+    Please choose a different username.
+</p>
+
+<div class="actions">
+    <a href="{{ url_for('auth.register_username') }}" class="btn">
+        Try another username
+    </a>
+
+<a href="{{ url_for('auth.start') }}" class="btn secondary">    
+        Return to Home
+    </a>
+</div>
+{% endblock %}

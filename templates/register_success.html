@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Registration Successful{% endblock %}
+
+{% block content %}
+<h1>Registration Successful</h1>
+<p>Your graphical password has been set.</p>
+<p>You may now log in using your graphical password.</p>
+
+<a href="{{ url_for('auth.login_username') }}" class="btn">Go to login</a>
+
+<a href="/" class="btn secondary">Return Home</a>
+{% endblock %}

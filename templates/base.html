@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Graphical MFA{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-content">
+         <a href="{{ url_for('auth.start') }}" class="header-title-link">           
+             Adaptive Graphical Authentication
+        </a>
+    </div>
+</header>
+
+
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

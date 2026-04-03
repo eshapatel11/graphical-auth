@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<h1>Login</h1>
+<p>Select your <strong>4-image sequence</strong>.</p>
+
+<form method="POST" action="{{ url_for('auth.login', username=username) }}">
+
+    <input type="hidden" name="sequence" id="sequenceInput">
+
+    <input type="hidden" name="username" value="{{ username }}">
+
+
+    <div class="grid" id="imageGrid">
+        {% for img in images %}
+            <div class="tile">
+                <img src="/images/{{ img }}"
+                     data-id="{{ img }}"
+                     alt="authentication image">
+                <span class="order-badge"></span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <button class="btn" id="submitBtn" disabled>Login</button>
+</form>
+
+<a href="/" class="btn secondary">Cancel</a>
+
+<!-- Error Modal -->
+<div id="errorModal" class="modal hidden">
+    <div class="modal-content">
+        <h2>Login Failed</h2>
+        <p id="modalMessage"></p>
+        <button id="closeModal" class="btn">OK</button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}
