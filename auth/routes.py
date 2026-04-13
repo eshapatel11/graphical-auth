@@ -59,18 +59,6 @@ def submit_consent():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 @auth_bp.route("/register-username", methods=["GET", "POST"])
 def register_username():
 
@@ -78,7 +66,8 @@ def register_username():
         return redirect(url_for("auth.information"))
 
     if request.method == "POST":
-        username = request.form.get("username")
+        username = request.form.get("username", "").strip().lower()
+
 
 
         conn = get_db_connection()
@@ -108,7 +97,8 @@ def login_username():
         return redirect(url_for("auth.information"))
 
     if request.method == "POST":
-        username = request.form.get("username")
+        username = request.form.get("username", "").strip().lower()
+
 
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -134,11 +124,13 @@ def login_username():
 @auth_bp.route("/register/<username>", methods=["GET", "POST"])
 def register(username):
     if request.method == "GET":
-        images = sorted(os.listdir("images"))
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        images = sorted(os.listdir(os.path.join(BASE_DIR, "..", "images")))
         random.shuffle(images)
+        session["reg_start"] = time()
         return render_template("register.html", images=images, username=username)
-    
-    
+
+
 
     # POST: handle registration
     sequence = request.form.get("sequence")
@@ -149,7 +141,7 @@ def register(username):
     parts = sequence.split("|")
     if len(set(parts)) != len(parts):
         return "Duplicate images not allowed", 400
-    
+
     # Prevent trivially ordered sequences (e.g. straight rows/columns)
     clean_ids = [p.replace(".svg", "") for p in parts]
 
@@ -161,7 +153,7 @@ def register(username):
 
     pattern_hash = bcrypt.hashpw(sequence_bytes, bcrypt.gensalt())
 
-    
+
     totp_secret = pyotp.random_base32()
 
 
@@ -177,27 +169,26 @@ def register(username):
     conn.commit()
     conn.close()
 
+    session["registration_time"] = time() - session.get("reg_start", time())
     return redirect(url_for("auth.register_success"))
 
 @auth_bp.route("/login/<username>", methods=["GET", "POST"])
 def login(username):
     if request.method == "GET":
-        images = sorted(os.listdir("images"))
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        images = sorted(os.listdir(os.path.join(BASE_DIR, "..", "images")))
         random.shuffle(images)
+        session["login_start"] = time()        
+        session["graphical_attempts"] = 0      
         return render_template("login.html", images=images, username=username)
-    
-    
+
+
 
     # POST: handle login
     sequence = request.form.get("sequence")
     if not sequence:
         return "Invalid sequence", 400
-    
-    # Start tracking authentication session
-    if "login_start" not in session:
-        session["login_start"] = time()
-        session["graphical_attempts"] = 0
-        session["incorrect_images"] = 0
+
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -220,7 +211,7 @@ def login(username):
 
     now = int(time())
 
-    # 🔒 Check if account is currently locked
+    # Check if account is currently locked
     if lock_until and now < lock_until:
         remaining_seconds = lock_until - now
         remaining_minutes = max(1, remaining_seconds // 60)
@@ -229,14 +220,14 @@ def login(username):
             f"Account locked. Try again in {remaining_minutes} minutes.",
             403
         )
-    
+
     session["graphical_attempts"] += 1
 
-    # 🔐 Check graphical password
+    #  Check graphical password
     if not bcrypt.checkpw(sequence.encode("utf-8"), stored_hash):
         failed_attempts += 1
 
-        # 🚨 Trigger lockout
+        #  Trigger lockout
         if failed_attempts >= MAX_ATTEMPTS:
             lock_until = now + LOCKOUT_SECONDS
             cursor.execute("""
@@ -252,7 +243,7 @@ def login(username):
                 403
             )
 
-        # ❌ Normal failure
+        #  Normal failure
         cursor.execute("""
             UPDATE users
             SET failed_attempts = ?
@@ -264,7 +255,7 @@ def login(username):
         remaining = MAX_ATTEMPTS - failed_attempts
         return f"Login failed. {remaining} attempts remaining.", 401
 
-    # ✅ SUCCESS — prepare recall stage
+    #  SUCCESS — prepare recall stage
 
     cursor.execute("""
          UPDATE users
@@ -310,7 +301,7 @@ def recall():
         challenge_type = session["recall_type"]
         instruction = get_recall_instruction(challenge_type)
 
-        images = sorted(os.listdir("images"))
+        images = sorted(os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "images")))
         random.shuffle(images)
 
         required_count = get_required_count(challenge_type)
@@ -334,13 +325,13 @@ def recall():
     expected = calculate_expected_sequence(original, challenge_type)
 
     if selected_parts == expected:
-         
+         session["recall_attempts"] += 1
          session["recall_time"] = time() - session["recall_start"]
 
          session["recall_verified"] = True
          session.pop("recall_type", None)
 
-          # 🔐 Generate secure OTP
+          #  Generate secure OTP
          otp = secrets.randbelow(1000000)
          session["otp_code"] = f"{otp:06d}"  # zero padded 6-digit
          session["otp_expiry"] = int(time()) + 60  # valid 60 seconds
@@ -357,8 +348,8 @@ def recall():
 
          return redirect(url_for("auth.recall_error"))
 
-      
-    
+
+
 
 @auth_bp.route("/success")
 def success():
@@ -370,12 +361,12 @@ def success():
 
     metrics = {
         "user_id": session.get("username"),
-        "registration_time": None,
+        "registration_time": session.get("registration_time"),
         "login_time": session.get("login_time"),
         "graphical_attempts": session.get("graphical_attempts"),
         "recall_attempts": session.get("recall_attempts"),
         "recall_time": session.get("recall_time"),
-        "otp_attempts": session.get("otp_attempts"),
+        "otp_attempts": session.get("otp_attempts_final"),
         "otp_time": session.get("otp_time"),
         "total_auth_time": total_auth_time,
         "login_success": 1
@@ -422,7 +413,7 @@ def calculate_expected_sequence(original, challenge_type):
 
     elif challenge_type == "first_and_last":
         return [original[0], original[-1]]
-    
+
 def get_required_count(challenge_type):
 
     if challenge_type == "third_image":
@@ -462,7 +453,7 @@ def otp_token():
         render_template("otp_token.html", remaining=remaining)
     )
 
-    # 🔒 Prevent browser caching of OTP page
+    #  Prevent browser caching of OTP page
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
@@ -489,7 +480,8 @@ def otp():
             return "Code expired. Login again.", 403
 
         if user_code == session.get("otp_code"):
-            session["otp_time"] = time() - session["otp_start"]
+            session["otp_time"] = time() - session.get("otp_start", time())
+            session["otp_attempts_final"] = session.get("otp_attempts", 0) + 1
 
             session.pop("otp_code", None)
             session.pop("otp_expiry", None)
@@ -501,7 +493,7 @@ def otp():
 
         else:
             session["otp_attempts"] += 1
-            return render_template("otp_token.html", 
+            return render_template("otp_token.html",
                                    remaining=session["otp_expiry"] - int(time()),
                                    error="Invalid code.")
 

@@ -2,7 +2,8 @@ import sqlite3
 import os
 
 
-DB_PATH = os.path.join("data", "app.db")
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "app.db")
+
 
 
 def get_db_connection():
@@ -21,7 +22,6 @@ def save_auth_metrics(data):
             registration_time,
             login_time,
             graphical_attempts,
-            incorrect_images,
             recall_attempts,
             recall_time,
             otp_attempts,
@@ -29,13 +29,12 @@ def save_auth_metrics(data):
             total_auth_time,
             login_success
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data.get("user_id"),
         data.get("registration_time"),
         data.get("login_time"),
         data.get("graphical_attempts"),
-        data.get("incorrect_images", 0),
         data.get("recall_attempts", 0),
         data.get("recall_time"),
         data.get("otp_attempts", 0),

@@ -19,21 +19,6 @@ def init_db():
         );
     """)
 
-    # Login events table
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS login_events (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER,
-            ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            ip TEXT,
-            browser TEXT,
-            risk_score INTEGER,
-            otp_required INTEGER,
-            success INTEGER,
-            mode TEXT,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-        );
-    """)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS auth_metrics (
@@ -42,7 +27,6 @@ def init_db():
             registration_time REAL,
             login_time REAL,
             graphical_attempts INTEGER,
-            incorrect_images INTEGER,
             recall_attempts INTEGER,
             recall_time REAL,
             otp_attempts INTEGER,
