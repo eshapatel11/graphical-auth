@@ -9,9 +9,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
-            salt TEXT,
             pattern_hash TEXT NOT NULL,
-            totp_secret TEXT,
             last_ip TEXT,
             last_browser TEXT,
             failed_attempts INTEGER DEFAULT 0,

@@ -5,7 +5,6 @@ import random
 from flask import render_template, request, redirect, url_for, session, flash
 import bcrypt
 from db import get_db_connection
-import pyotp
 from time import time
 import secrets
 from flask import make_response
@@ -154,16 +153,15 @@ def register(username):
     pattern_hash = bcrypt.hashpw(sequence_bytes, bcrypt.gensalt())
 
 
-    totp_secret = pyotp.random_base32()
 
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT INTO users (username, pattern_hash, totp_secret)
-    VALUES (?, ?, ?)
-""", (username, pattern_hash, totp_secret))
+    INSERT INTO users (username, pattern_hash)
+    VALUES (?, ?)
+""", (username, pattern_hash))
 
 
     conn.commit()

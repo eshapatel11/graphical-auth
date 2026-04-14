@@ -29,4 +29,3 @@ python app.py
 - Python / Flask
 - SQLite
 - bcrypt
-- PyOTP
