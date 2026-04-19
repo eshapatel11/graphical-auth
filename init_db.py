@@ -10,8 +10,6 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             pattern_hash TEXT NOT NULL,
-            last_ip TEXT,
-            last_browser TEXT,
             failed_attempts INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
